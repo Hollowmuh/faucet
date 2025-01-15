@@ -6,6 +6,7 @@ import { Droplets } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useState } from "react";
 import { toast } from "sonner";
+import { requestTokens } from "@/services/api";
 
 export const FaucetCard = () => {
   const [address, setAddress] = useState("");
@@ -42,21 +43,26 @@ export const FaucetCard = () => {
         return;
       }
 
-      // Log request attempt for monitoring
-      console.log("Token request attempt:", {
+      // Call API service
+      await requestTokens({
         address,
         amount,
-        timestamp: new Date().toISOString(),
+        captchaToken,
       });
-
-      // Mock API call - replace with actual implementation
-      await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast.success("Tokens sent successfully!");
       
+      // Reset form
+      setAddress("");
+      setAmount("");
+      setCaptchaToken(null);
+      
     } catch (error) {
-      console.error("Request failed:", error);
-      toast.error("Failed to send tokens. Please try again.");
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to send tokens. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
