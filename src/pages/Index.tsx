@@ -2,6 +2,7 @@ import { FaucetCard } from "@/components/FaucetCard";
 import { Header } from "@/components/Header";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { TransactionHistory } from "@/components/TransactionHistory";
+import { FaqSection } from "@/components/FaqSection";
 
 const Index = () => {
   return (
@@ -11,6 +12,7 @@ const Index = () => {
         <NetworkStatus />
         <FaucetCard />
         <TransactionHistory />
+        <FaqSection />
       </main>
     </div>
   );

@@ -1,19 +1,30 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Droplets } from "lucide-react";
-import ReCAPTCHA from "react-google-recaptcha";
 import { useState } from "react";
 import { toast } from "sonner";
 import { requestTokens } from "@/services/api";
+import { RequestForm } from "./RequestForm";
 
+/**
+ * FaucetCard Component
+ * 
+ * This component handles the token distribution interface for the faucet.
+ * It integrates with a smart contract (to be implemented) for token distribution.
+ * 
+ * Smart Contract Integration TODO:
+ * 1. Implement ERC20 token contract with minting capabilities
+ * 2. Add distributeTokens function with access control
+ * 3. Implement rate limiting on-chain
+ * 4. Add emergency pause functionality
+ * 5. Setup events for monitoring and tracking
+ */
 export const FaucetCard = () => {
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
+  // Validate Ethereum address format
   const validateAddress = (address: string) => {
     return /^0x[a-fA-F0-9]{40}$/.test(address);
   };
@@ -76,45 +87,18 @@ export const FaucetCard = () => {
           Request Tokens
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Wallet Address</label>
-          <Input 
-            placeholder="0x..." 
-            className="bg-white/50"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Amount</label>
-          <Select value={amount} onValueChange={setAmount}>
-            <SelectTrigger className="bg-white/50">
-              <SelectValue placeholder="Select amount" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10">10 Tokens</SelectItem>
-              <SelectItem value="20">20 Tokens</SelectItem>
-              <SelectItem value="50">50 Tokens</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex justify-center">
-          <ReCAPTCHA
-            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "your-recaptcha-site-key"}
-            onChange={(token) => setCaptchaToken(token)}
-          />
-        </div>
+      <CardContent>
+        <RequestForm 
+          address={address}
+          amount={amount}
+          isLoading={isLoading}
+          onAddressChange={setAddress}
+          onAmountChange={setAmount}
+          onCaptchaChange={setCaptchaToken}
+          onSubmit={handleSubmit}
+          disabled={!captchaToken}
+        />
       </CardContent>
-      <CardFooter>
-        <Button 
-          className="w-full bg-gradient-to-r from-faucet-primary to-faucet-secondary hover:opacity-90"
-          onClick={handleSubmit}
-          disabled={isLoading || !captchaToken}
-        >
-          {isLoading ? "Sending..." : "Request Tokens"}
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
