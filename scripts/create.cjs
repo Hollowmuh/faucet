@@ -11,7 +11,8 @@ async function main() {
             'NGNATOKEN_ADDRESS',
             'INFURA_API_KEY',
             'COLLATERAL_MANAGER_ADDRESS',
-            'MARKETPLACE_ADDRESS'
+            'MARKETPLACE_ADDRESS',
+            "VITE_FAUCET_CONTRACT_ADDRESS"
         ];
 
         for (const envVar of requiredEnvVars) {
@@ -27,8 +28,8 @@ async function main() {
             USDTTOKEN_ADDRESS: usdtTokenAddress,
             NGNATOKEN_ADDRESS: ngnaTokenAddress,
             INFURA_API_KEY: infuraApiKey,
-            COLLATERAL_MANAGER_ADDRESS: collateralManagerAddress,
-            MARKETPLACE_ADDRESS: marketplaceAddress
+            // COLLATERAL_MANAGER_ADDRESS: collateralManagerAddress,
+            VITE_FAUCET_CONTRACT_ADDRESS: marketplaceAddress
         } = process.env;
 
         // Configure the provider using Infura
@@ -36,12 +37,12 @@ async function main() {
         const wallet = new ethers.Wallet(deployerPrivateKey, provider);
 
         // Get contract artifacts
-        const marketplaceABI = require("../artifacts/contracts/p2plendMarketplace.sol/P2PLendingMarketplace.json").abi;
-        const managerABI = require("../artifacts/contracts/p2pCollateral.sol/CollateralManager.json").abi;
+        const marketplaceABI = require("../artifacts/contracts/faucet.sol/TokenFaucet.json").abi;
+        // const managerABI = require("../artifacts/contracts/p2pCollateral.sol/CollateralManager.json").abi;
 
         // Initialize contracts
         const marketplace = new ethers.Contract(marketplaceAddress, marketplaceABI, wallet);
-        const collateralManager = new ethers.Contract(collateralManagerAddress, managerABI, wallet);
+        // const collateralManager = new ethers.Contract(collateralManagerAddress, managerABI, wallet);
 
         console.log("Setting token statuses in marketplace...");
 
@@ -54,7 +55,7 @@ async function main() {
 
         for (const token of tokens) {
             try {
-                const tx = await marketplace.setTokenStatus(token.address, true);
+                const tx = await marketplace.addSupportedToken(token.address);
                 await tx.wait();
                 console.log(`Successfully enabled ${token.name} token at address: ${token.address}`);
             } catch (error) {

@@ -24,34 +24,50 @@ export const RequestForm = () => {
   const [token, setToken] = useState<TokenKey | ''>('');
   const [isLoading, setIsLoading] = useState(false);
   const captchaRef = useRef<ReCAPTCHA>(null);
+const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   const handleSubmit = async () => {
-    // Validate inputs
-    if (!token || !amount) {
-      return;
-    }
-
-    // Get reCAPTCHA token
-    const captchaToken = captchaRef.current?.getValue() || null;
+    if (!token || !amount) return;
 
     setIsLoading(true);
     try {
       const success = await requestTokens(
         token, 
         parseInt(amount.replace(/,/g, '')), 
-        captchaToken
       );
 
       if (success) {
-        // Reset form on success
+        setShowSuccessDialog(true);
         setAmount('');
-        setToken('');
-        captchaRef.current?.reset();
       }
     } catch (error) {
       console.error('Token request failed', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+  const addTokenToMetaMask = async (tokenKey: TokenKey) => {
+    if (!window.ethereum) {
+      alert('MetaMask is not installed');
+      return;
+    }
+
+    const tokenAddress = TOKEN_ADDRESSES[tokenKey];
+    try {
+      await window.ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: tokenAddress,
+            symbol: tokenKey,
+            decimals: 18 // Adjust if different
+          }
+        }
+      });
+      setShowSuccessDialog(false);
+    } catch (error) {
+      console.error('Failed to add token', error);
     }
   };
 
@@ -96,10 +112,10 @@ export const RequestForm = () => {
         </Select>
       </div>
       <div className="flex justify-center">
-        <ReCAPTCHA
+        {/* <ReCAPTCHA
           ref={captchaRef}
           sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "your-recaptcha-site-key"}
-        />
+        /> */}
       </div>
       <Button
         className="w-full bg-gradient-to-r from-faucet-primary to-faucet-secondary hover:opacity-90"
@@ -108,6 +124,29 @@ export const RequestForm = () => {
       >
         {isLoading ? "Sending..." : "Request Tokens"}
       </Button>
-    </div>
+
+      {showSuccessDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl text-center space-y-4">
+            <h2 className="text-xl font-bold">Token Request Successful!</h2>
+            <p>Would you like to add {token} to MetaMask?</p>
+            <div className="flex justify-center space-x-4">
+              <Button 
+                onClick={() => addTokenToMetaMask(token as TokenKey)}
+                className="bg-green-500 hover:bg-green-600"
+              >
+                Add to MetaMask
+              </Button>
+              <Button 
+                onClick={() => setShowSuccessDialog(false)}
+                variant="outline"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+          </div>
+        )}
+        </div>
   );
 };

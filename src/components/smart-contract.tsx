@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { useToast } from "@/components/ui/use-toast";
 import { useAccount } from 'wagmi';
+import TokenFaucet from "../artifacts/contracts/faucet.sol/TokenFaucet.json"
 
 // Token Faucet Contract Configuration
 const CONTRACT_ADDRESS = import.meta.env.VITE_FAUCET_CONTRACT_ADDRESS;
@@ -14,6 +15,7 @@ const TOKEN_ADDRESSES = {
 export function FaucetHook() {
   const { toast } = useToast();
   const { address: userAddress, isConnected } = useAccount();
+  const owner = import.meta.env.VITE_ADDRESS;
   
   const [contract, setContract] = useState(null);
   const [provider, setProvider] = useState(null);
@@ -41,16 +43,12 @@ export function FaucetHook() {
       }
       
       // Import ABI dynamically or define here
-      const contractABI = [
-        "function requestTokens(address tokenAddress, uint256 amount, string memory captchaResponse)",
-        "function addSupportedToken(address tokenAddress)",
-        "function withdrawTokens(address tokenAddress, uint256 amount)"
-      ];
+      const contractABI = TokenFaucet.abi
       
       const contractInstance = new ethers.Contract(
         CONTRACT_ADDRESS,
         contractABI,
-        signerInstance
+        signer
       );
       
       setContract(contractInstance);

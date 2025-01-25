@@ -11,8 +11,7 @@ async function main() {
             'USDTTOKEN_ADDRESS',
             'NGNATOKEN_ADDRESS',
             'INFURA_API_KEY',
-            'COLLATERAL_MANAGER_ADDRESS',
-            'MARKETPLACE_ADDRESS'
+            'VITE_FAUCET_CONTRACT_ADDRESS',
         ];
 
         for (const envVar of requiredEnvVars) {
@@ -26,13 +25,13 @@ async function main() {
         const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
         // Contract initialization
-        const managerABI = require("../artifacts/contracts/p2pCollateral.sol/CollateralManager.json").abi;
+        const managerABI = require("../artifacts/contracts/faucet.sol/TokenFaucet.json").abi;
         const collateralManager = new ethers.Contract(
-            process.env.COLLATERAL_MANAGER_ADDRESS,
+            process.env.VITE_FAUCET_CONTRACT_ADDRESS,
             managerABI,
             wallet
         );
-        const tx = await collateralManager.setMarketplace(process.env.MARKETPLACE_ADDRESS);
+        const tx = await collateralManager.addSu(process.env.MARKETPLACE_ADDRESS);
                 
         const receipt = await tx.wait();
         console.log(
