@@ -78,7 +78,7 @@ export function FaucetHook() {
     init();
   }, [isConnected]);
 
-  const requestTokens = async (tokenKey, amount, captchaToken) => {
+  const requestTokens = async (tokenKey, amount) => {
     if (!isConnected) {
       toast({
         title: "Error",
@@ -100,8 +100,7 @@ export function FaucetHook() {
       // Call contract method to request tokens
       const tx = await contractInstance.requestTokens(
         tokenAddress, 
-        amount, 
-        captchaToken || ''
+        amount
       );
       
       await tx.wait();
