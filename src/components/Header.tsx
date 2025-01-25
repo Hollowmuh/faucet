@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { WalletIcon } from "lucide-react";
+import { WalletConnect } from "./WalletConnect";
 
 export const Header = () => {
   return (
@@ -10,10 +11,7 @@ export const Header = () => {
             Token Faucet
           </span>
         </div>
-        <Button variant="outline" className="gap-2">
-          <WalletIcon className="h-4 w-4" />
-          Connect Wallet
-        </Button>
+        <WalletConnect/>
       </div>
     </header>
   );
